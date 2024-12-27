@@ -408,7 +408,7 @@
         - <button> 태그안에 `card-button` 클래스를 부여해 주세요.
         - 카드에 내용은 자유롭게 채워 주세요. -->
       <div id="card-area" class="card-area row row-cols-1 row-cols-md-3 g-4">
-        <!-- <div class="col">
+        <div class="col">
           <div class="card h-100">
             <img
               src="https://www.redcappizza.com/resources/img/menu/gds_hawaiian.jpg"
@@ -452,7 +452,7 @@
               <button class="card-button">주문하기</button>
             </div>
           </div>
-        </div> -->
+        </div>
       </div>
     </div>
 
@@ -551,8 +551,8 @@
         measurementId: "G-2YBG8JXBVQ",
       };
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+      // const app = initializeApp(firebaseConfig);
+      // const db = getFirestore(app);
 
       $("#addBtn").click(async () => {
         let image = $("#floatingInput").val();
@@ -566,53 +566,53 @@
           star,
           comment,
         };
-        const docRef = await addDoc(collection(db, "foodFighter"), newData);
-        if (docRef.id) {
-          alert("새로운 항목이 등록되었습니다.");
-        }
+        // const docRef = await addDoc(collection(db, "foodFighter"), newData);
+        // if (docRef.id) {
+        //   alert("새로운 항목이 등록되었습니다.");
+        // }
         $("#floatingInput").val("");
         $("#foodTitle").val("");
         $("#inputGroupSelect03").val("");
         $("#floatingTextarea").val("");
 
-        fetchFoodList();
+        // fetchFoodList();
       });
 
-      async function fetchFoodList() {
-        $("#card-area").empty();
-        let docs = await getDocs(collection(db, "foodFighter"));
-        docs.forEach((doc) => {
-          let row = doc.data();
-          let star = "";
-          if (row) {
-            for (let i = 0; i < row.star; i++) {
-              star += "⭐";
-            }
-          }
+      // async function fetchFoodList() {
+      //   $("#card-area").empty();
+      //   let docs = await getDocs(collection(db, "foodFighter"));
+      //   docs.forEach((doc) => {
+      //     let row = doc.data();
+      //     let star = "";
+      //     if (row) {
+      //       for (let i = 0; i < row.star; i++) {
+      //         star += "⭐";
+      //       }
+      //     }
 
-          let tempHtml = `
-          <div class="col">
-          <div class="card h-100">
-            <img
-              src="${row.image}"
-              class="card-img-top"
-            />
-            <div class="card-body">
-              <h5 class="card-title">${row.title}</h5>
-              <p>${star}</p>
-              <p class="card-text">${row.comment}</p>
-              <button class="card-button">주문하기</button>
-            </div>
-          </div>
-        </div>
-          `;
-          $("#card-area").append(tempHtml);
-        });
-      }
+      //     let tempHtml = `
+      //     <div class="col">
+      //     <div class="card h-100">
+      //       <img
+      //         src="${row.image}"
+      //         class="card-img-top"
+      //       />
+      //       <div class="card-body">
+      //         <h5 class="card-title">${row.title}</h5>
+      //         <p>${star}</p>
+      //         <p class="card-text">${row.comment}</p>
+      //         <button class="card-button">주문하기</button>
+      //       </div>
+      //     </div>
+      //   </div>
+      //     `;
+      //     $("#card-area").append(tempHtml);
+      //   });
+      // }
 
-      window.onload = () => {
-        fetchFoodList();
-      };
+      // window.onload = () => {
+      //   fetchFoodList();
+      // };
     </script>
   </body>
 </html>
