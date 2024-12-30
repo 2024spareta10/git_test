@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      desc="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>내일배움캠프를 시작하며</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap");
+
+      * {
+        font-family: "Gowun Dodum", sans-serif;
+      }
+      body {
+        font-family: "Roboto", sans-serif;
+      }
+
+      .mytitle {
+        background-color: green;
+        color: white;
+
+        height: 250px;
+
+        /* 내용물을 정렬 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        background-image: url("https://firebasestorage.googleapis.com/v0/b/sparta-ce4d4.firebasestorage.app/o/spartaImg%2FmainImage.png?alt=media&token=b763c654-febe-44c4-8923-54b412f3f830");
+        background-position: center;
+        background-size: cover;
+        z-index: 1;
+        position: relative;
+      }
+
+      .mytitle::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7); /* 검은색 반투명 오버레이 */
+        z-index: -1; /* 오버레이가 내용 아래로 가도록 설정 */
+      }
+
+      .mytitle > button {
+        width: 150px;
+        height: 50px;
+        background-color: transparent;
+        border: none;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 5px;
+
+        border: 1px solid white;
+        margin-top: 20px;
+      }
+
+      .mypostingbox .file-input {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .mypostingbox .image-wrapper {
+        width: auto;
+        min-height: 150px;
+        max-height: 300px;
+        position: relative;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .mypostingbox .image-wrapper > .btn-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.7);
+        border: none;
+        font-size: 1rem;
+        display: flex;
+        align-content: center;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .mypostingbox .image-wrapper > .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(0, 0, 0, 0.1);
+        border-top-color: #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        transform: translate(-50%, -50%);
+        position: absolute;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .mycards {
+        margin: 20px auto 20px auto;
+        max-width: 1200px;
+      }
+
+      .mypostingbox {
+        max-width: 500px;
+        margin: 20px auto 20px auto;
+        padding: 20px 20px 20px 20px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 3px 0px blue;
+        background: #f0f8ff;
+      }
+
+      .required::before {
+        content: "*";
+        font-size: 0.8rem;
+        color: red;
+        margin-right: 4px;
+      }
+
+      .mybtn {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+
+        margin-top: 10px;
+      }
+
+      .mybtn > button {
+        margin-right: 10px;
+      }
+
+      @media (max-width: 550px) {
+        .mypostingbox {
+          margin-left: 1rem;
+          margin-right: 1rem;
+        }
+      }
+      @media (max-width: 1200px) {
+        .mycards {
+          margin-left: 1rem;
+          margin-right: 1rem;
+        }
+      }
+    </style>
+    <script type="module">
+      // Firebase SDK 라이브러리 가져오기
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytes,
+        getDownloadURL,
+        deleteObject,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+      import {
+        getAuth,
+        signInAnonymously,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+      // Firebase 구성 정보 설정
+      const firebaseConfig = {};
+      // Firebase 인스턴스 초기화
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const storage = getStorage(app);
+      const auth = getAuth();
+      let image = "";
+
+      // window 실행시 카드 리스트 불러오기 & 이미지 미리보기 창 숨기기
+      window.onload = () => {
+        fetchCardList();
+        $(".image-wrapper").toggle();
+      };
+
+      // 토글 버튼 클릭시 postingbox 토글
+      $(".togglebtn").click(async function () {
+        $("#postingbox").toggle();
+      });
+
+      // 미세먼지 불러오기
+      let url = "http://spartacodingclub.shop/sparta_api/seoulair";
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          let mise = data["RealtimeCityAir"]["row"][0]["IDEX_NM"];
+          setTimeout(() => {
+            alert("오늘의 미세먼지: " + mise);
+          }, 2000);
+        });
+
+      // 카드 리스트 불러오기
+      async function fetchCardList() {
+        $("#card").empty();
+
+        let docs = await getDocs(collection(db, "sparta"));
+        docs.forEach((doc) => {
+          let row = doc.data();
+
+          let image = row["image"];
+          let title = row["title"];
+          let desc = row["desc"];
+          let date = row["date"];
+
+          let temp_html = `
+              <div class="col">
+                  <div class="card h-100">
+                      <img src="${image}"
+                          class="card-img-top" alt="...">
+                      <div class="card-body">
+                          <h5 class="card-title">${title}</h5>
+                          <p class="card-text">${desc}</p>
+                      </div>
+                      <div class="card-footer">
+                          <small class="text-muted">${date}</small>
+                      </div>
+                  </div>
+              </div>`;
+          $("#card").append(temp_html);
+        });
+      }
+
+      // 오늘의 날짜
+      const date = document.getElementById("date");
+      date.value = new Date().toISOString().split("T")[0];
+
+      // 이미지 업로드 함수
+      async function uploadFile(file) {
+        if (file) {
+          $(".image-wrapper").toggle();
+          try {
+            const imagePrview = document.getElementById("image-preview");
+            const storageRef = ref(storage, "spartaImg/" + file.name);
+            const snapshot = await uploadBytes(storageRef, file);
+            const url = await getDownloadURL(snapshot.ref);
+
+            if (url) {
+              imagePrview.src = url;
+              image = url;
+              if (image) $(".loading-spinner").toggle();
+            }
+          } catch (error) {
+            console.error("Failed to uploadFile", error);
+          }
+        }
+      }
+
+      // 이미지 업로드 이벤트
+      document.getElementById("image").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        const button = document.getElementById("postingbtn");
+
+        button.innerHTML = `
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>`;
+        try {
+          await signInAnonymously(auth);
+          await uploadFile(file);
+        } catch (e) {
+          console.error("Failed To Auth", e);
+        } finally {
+          button.innerHTML = "기록하기";
+        }
+      });
+
+      // 기록하기 버튼 클릭시
+      $("#postingbtn").click(async function () {
+        let title = $("#title").val();
+        let desc = $("#desc").val();
+        let date = $("#date").val();
+
+        if (!image)
+          return alert("추가하실 알고리즘 코드의 이미지를 업로드 해주세요.");
+        if (!title) return alert("알고리즘 문제명을 입력해주세요.");
+        if (!date) return alert("추가하실 알고리즘의 날짜를 추가해주세요.");
+
+        if (image) {
+          let doc = {
+            image: image,
+            title: title,
+            desc: desc,
+            date: date,
+          };
+
+          await addDoc(collection(db, "sparta"), doc);
+
+          alert("저장완료!");
+          window.location.reload();
+        }
+      });
+
+      // 이미지 삭제 버튼 클릭시
+      $(".btn-close").click(async (e) => {
+        if (image) {
+          if (confirm("업로드 하신 이미지를 삭제하시겠습니까?")) {
+            try {
+              const fileRef = ref(storage, image);
+              await deleteObject(fileRef);
+            } catch (error) {
+              console.error("Failed to delete upload image: ", error);
+            } finally {
+              image = "";
+              document.getElementById("image").value = "";
+              $(".image-wrapper").toggle();
+              $(".loading-spinner").toggle();
+            }
+          }
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="mytitle">
+      <h1>내일배움캠프를 시작하며</h1>
+      <!-- <p>현재 서울의 미세먼지 : <span id="msg">나쁨</span></p> -->
+      <button class="togglebtn">기록 저장하기</button>
+    </div>
+    <div class="mypostingbox" id="postingbox">
+      <div class="file-input mb-3">
+        <label for="floatingInput" class="form-label required">
+          오늘의 코딩 알고리즘 이미지</label
+        >
+        <input type="file" class="form-control" id="image" accept="image/*" />
+      </div>
+      <div class="image-wrapper mb-3">
+        <div class="loading-spinner"></div>
+        <img id="image-preview" style="max-width: 300px; max-height: 300px" />
+        <button class="btn-close">X</button>
+      </div>
+      <div class="form-floating mb-3">
+        <input
+          type="text"
+          class="form-control"
+          id="title"
+          placeholder="알고리즘 문제명을 입력하세요."
+        />
+        <label for="floatingInput" class="required">알고리즘 문제명</label>
+      </div>
+      <div class="form-floating mb-3">
+        <textarea
+          class="form-control"
+          id="desc"
+          placeholder="코드를 설명해주세요."
+          style="height: 100px"
+        ></textarea>
+        <label for="floatingTextarea">코드 설명</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="date" class="form-control" id="date" />
+        <label for="floatingInput" class="required">오늘의 날짜</label>
+      </div>
+      <div class="mybtn">
+        <button id="postingbtn" type="button" class="btn btn-dark">
+          기록하기
+        </button>
+        <button type="button" class="btn togglebtn btn-outline-dark bg-white">
+          닫기
+        </button>
+      </div>
+    </div>
+
+    <div class="mycards">
+      <div id="card" class="row row-cols-1 row-cols-md-4 g-4">
+        <!-- <div class="col">
+          <div class="card h-100">
+            <img
+              src="https://images.unsplash.com/photo-1446768500601-ac47e5ec3719?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1446&q=80"
+              class="card-img-top"
+              alt="..."
+            />
+            <div class="card-body">
+              <h5 class="card-title">앨범 제목</h5>
+              <p class="card-text">앨범 내용</p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted">앨범 날짜</small>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card h-100">
+            <img
+              src="https://images.unsplash.com/photo-1446768500601-ac47e5ec3719?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1446&q=80"
+              class="card-img-top"
+              alt="..."
+            />
+            <div class="card-body">
+              <h5 class="card-title">앨범 제목</h5>
+              <p class="card-text">앨범 내용</p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted">앨범 날짜</small>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card h-100">
+            <img
+              src="https://images.unsplash.com/photo-1446768500601-ac47e5ec3719?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1446&q=80"
+              class="card-img-top"
+              alt="..."
+            />
+            <div class="card-body">
+              <h5 class="card-title">앨범 제목</h5>
+              <p class="card-text">앨범 내용</p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted">앨범 날짜</small>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card h-100">
+            <img
+              src="https://images.unsplash.com/photo-1446768500601-ac47e5ec3719?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1446&q=80"
+              class="card-img-top"
+              alt="..."
+            />
+            <div class="card-body">
+              <h5 class="card-title">앨범 제목</h5>
+              <p class="card-text">앨범 내용</p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted">앨범 날짜</small>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </body>
+</html>
