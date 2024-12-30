@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 추억앨범</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
+
+        /* * {
+            font-family: "Nanum Pen Script", serif;
+        } */
+
+        .mytitle {
+            font-family: "Nanum Pen Script", serif;
+            height: 300px;
+            background-image: url('image.png');
+            background-position: center;
+            background-size: cover;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mytitle>button {
+            width: 150px;
+            height: 50px;
+            background-color: transparent;
+            border: 1px solid white;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .mycards {
+
+            width: 1200px;
+            margin: 30px auto 0px auto;
+        }
+
+        .mybtn {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mybtn>button {
+            margin: 5px
+        }
+
+        .mypostingbox {
+            width: 500px;
+            margin: 40px auto 0px auto;
+            padding: 20px;
+            box-shadow: 0px 0px 10px 0px white;
+            border-radius: 5px;
+        }
+
+        body {
+            background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8JUVCJUIwJTk0JUVCJThCJUE0JTIwJUVEJTkyJThEJUVBJUIyJUJEfGVufDB8fDB8fHww");
+            background-position: center;
+            background-size: cover;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="module">
+        // Firebase SDK 라이브러리 가져오기
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getDocs, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwvOuvmxH3MMf-k3jbw652QZvXvKxS6wE",
+            authDomain: "sparta-4fc53.firebaseapp.com",
+            projectId: "sparta-4fc53",
+            storageBucket: "sparta-4fc53.firebasestorage.app",
+            messagingSenderId: "376799078910",
+            appId: "1:376799078910:web:a87c9c9a4753d1f6a4f8af",
+            measurementId: "G-X4XVBGWC61"
+        };
+
+        // Firebase 인스턴스 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // const a = location.search; //url뒤에 파라미터부분 가져옴 ?dos_id="머시기머시기"
+        // const param = new URLSearchParams(a)//파라미터부분을 key,value값으로 변환 
+        const urlParams = new URL(location.href).searchParams; //파라미터 url로 변경 
+        const doc_id = urlParams.get('doc_id'); //변경된 url에서 get으로 데이터 가져와서 사용 튜터님한테 자세히 물어보기
+
+
+
+        //파라미터에 데이터 있을때 코드실행 >> 입력폼 수정 삭제로 변경 
+        if (doc_id != null) {
+            const temp_doc = await getDoc(doc(db, 'albums', doc_id));
+            //doc, getDoc import 
+            //doc를 아이디값으로 지정 > doc(db, 'albums', doc_id) ( db에 albums 컬랙션에 doc_id를 가진 문서 )
+            //doc를 불러오기  await getDoc(도스)
+            let row = temp_doc.data();
+            let image = row.image;
+            let title = row.title;
+            let content = row.content;
+            let date = row.date;
+            let temp_html = `
+            <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="image" value="${image}" placeholder="앨범이미지">
+            <label for="floatingInput">앨범이미지</label>
+            </div>
+            <div class="form-floating mb-3">
+            <input type="email" class="form-control" value="${title}" id="title" placeholder="앨범제목">
+            <label for="floatingInput">앨범제목</label>
+            </div>
+            <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="content" value="${content}" placeholder="앨범내용">
+            <label for="floatingInput">앨범내용</label>
+            </div>
+            <div class="form-floating mb-3">
+            <input type="email" class="form-control" value="${date}" id="date" placeholder="앨범날짜">
+            <label for="floatingInput">앨범날짜
+            </label>
+            </div>
+            <div class="mybtn">
+            <button type="button" class="btn btn-dark" id="update">수정하기</button>
+            <button type="button" id="del" class="btn btn-outline-dark">삭제</button>
+            <button type="button" id="cancel" class="btn btn-outline-dark">취소</button>
+            </div>
+            `
+            $('#mypostingbox').empty();
+            $('#mypostingbox').append(temp_html);
+        }
+
+
+        //수정하기버튼클릭시
+        $("#update").click(async function () {
+            //삭제후저장
+            await del();
+            await save();
+            window.location.replace('index.html')
+        })
+
+        //삭제하기버튼클릭
+        $("#del").click(async function () {
+            await del();
+            alert("삭제완료");
+            window.location.replace('index.html');
+        })
+
+        //취소버튼클릭시
+        $("#cancel").click(async function () {
+            window.location.replace('index.html');
+        })
+
+        //저장하기버튼클릭
+        $("#postingbtn").click(async function () {
+            await save();
+            window.location.replace('index.html')
+        })
+
+
+        //파이어베이스에서 데이터삭제
+        async function del() {
+            await deleteDoc(doc(db, 'albums', doc_id));//삭제메서드 import { doc, deleteDoc }필요....
+        }
+
+
+        //파이어베이스에 데이터저장
+        async function save() {
+            let image = $('#image').val();
+            let title = $('#title').val();
+            let content = $('#content').val();
+            let date = $('#date').val();
+            let doc = {
+                'image': image,
+                'title': title,
+                'content': content,
+                'date': date
+            };
+            await addDoc(collection(db, "albums"), doc);
+            alert('저장완료');
+        }
+
+
+        //>>1.여기 페이지로 form으로 docid값 넘겨서 활용
+        //>>2.카드 만들때 자기 아이디값 수정/삭제버튼에 네임벨류로 추가해서 만들기
+        //>>3.누르면 이 페이지에 자기 아이디값을 전송 / 페이지에 자기 아이디값을 넘겨서활용
+        //>> 보통 삭제할때마다 새로고침 안하는거 같은데 이건 삭제할때마다 페이지 새로고침 튜터님한테 질문해보기
+        //>> 튜터님께서 이벤트로 아이디값을 받아서 활용한다고함 이벤트는 아직 뭔지 모르겠음 나중에배운다고함
+        //카드출력부분
+        let docs = await getDocs(collection(db, "albums"));
+        docs.forEach((doc) => {
+            let row = doc.data();
+            let image = row.image;
+            let title = row['title'];
+            let content = row.content;
+            let date = row.date;
+
+            let doc_id = doc.id; //해당 문서의 아이디값
+
+            let temp_html = ` 
+            <div class="col">
+                <div class="card h-100">
+                    <img src="${image}"
+                        class="card-img-top" alt="이미지">
+                    <div class="card-body">
+                        <h5 class="card-title">${title}</h5>
+                        <p class="card-text">${content}</p>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-body-secondary">${date}</small>
+                    </div>
+                    <form action="index.html"><button class="btn btn-dark" name="doc_id" value="${doc_id}">수정/삭제</button></form>
+                </div>
+            </div>`;
+            $('#card').append(temp_html);
+        });
+
+        // <form action="index.html"><button class="btn btn-dark" name="doc_id" value="${doc_id}">수정/삭제</button></form>
+        //파라미터 링크index?=doc_id="아이디값"으로 페이자가 넘어가게 하는 버튼 생성
+
+        //입력폼 토글
+        $("#openclose").click(function () {
+            $('#mypostingbox').toggle();
+        })
+        $("#close").click(function () {
+            $('#mypostingbox').toggle();
+        })
+
+
+
+        //미세먼지API 받아와서 출력
+        let url = "http://spartacodingclub.shop/sparta_api/seoulair";
+        fetch(url).then(res => res.json()).then(data => {
+            let mise = data['RealtimeCityAir']['row'][0]['IDEX_NM'];
+            $('#msg').text(mise);
+        })
+
+
+        // function openClose() {
+        //     $('#mypostingbox').toggle();
+        // } 원래 입력폼 토글이였는데 자바스크립트 모듈선언하면 온클릭안됨 왜 그런지 
+    </script>
+</head>
+
+
+<body>
+    <div class="mytitle">
+        <h1>나만의 추억앨범</h1>
+        <p>현재 서울의 미세먼지 : <span id="msg">좋음</span></p>
+        <button id="openclose">추억저장하기</button>
+    </div>
+    <div class="bodyimg">
+        <div id="mypostingbox" class="mypostingbox">
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="image" placeholder="앨범이미지">
+                <label for="floatingInput">앨범이미지</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="title" placeholder="앨범제목">
+                <label for="floatingInput">앨범제목</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="content" placeholder="앨범내용">
+                <label for="floatingInput">앨범내용</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="date" placeholder="앨범날짜">
+                <label for="floatingInput">앨범날짜
+                </label>
+            </div>
+            <div class="mybtn">
+                <button type="button" class="btn btn-dark" id="postingbtn">기록하기</button>
+                <button type="button" id="close" class="btn btn-outline-dark">닫기</button>
+            </div>
+        </div>
+        <div class="mycards">
+            <div id="card" class="row row-cols-1 row-cols-md-4 g-4">
+                <!-- 카드출력부분 -->
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
